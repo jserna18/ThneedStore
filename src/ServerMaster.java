@@ -12,6 +12,8 @@ public class ServerMaster
 
   public ServerMaster(int portNumber)
   {
+    ThneedStore store = new ThneedStore();
+
     try
     {
       serverSocket = new ServerSocket(portNumber);
@@ -43,11 +45,11 @@ public class ServerMaster
       try
       {
         Socket client = serverSocket.accept();
-        ServerWorker worker = new ServerWorker(client);
+        ServerWorker worker = new ServerWorker(client, this);
         worker.start();
         System.out.println("ServerMaster: *********** new Connection");
         allConnections.add(worker);
-        worker.send("ServerMaster says hello!");
+        worker.send("ServerMaster in waitForConnection says hello!");
       }
       catch (IOException e)
       {
@@ -58,8 +60,10 @@ public class ServerMaster
     }
   }
 
-  public void cleanConnectionList()
+  public void cleanConnectionList(ServerWorker worker)
   {
+    allConnections.remove(worker);
+    System.out.println("cleared worker: " + worker.workerId);
 
   }
 
@@ -80,7 +84,7 @@ public class ServerMaster
       try
       {
         port = Integer.parseInt(args[0]);
-        if (port < 1) throw new Exception();
+        if ((port < 1024) || (port > 65535)) throw new Exception();
       }
       catch (Exception e)
       {

@@ -13,7 +13,7 @@ public class Client
   private BufferedReader reader;
   private long startNanoSec;
   private Scanner keyboard;
-  private ClientListener listener;
+  private ClientSocketListener listener;
 
   private volatile int sneedsInStore;
 
@@ -28,7 +28,7 @@ public class Client
     {
     }
 
-    listener = new ClientListener();
+    listener = new ClientSocketListener();
     System.out.println("Client(): Starting listener = : " + listener);
     listener.start();
 
@@ -96,28 +96,32 @@ public class Client
       if (cmd.length() < 1) continue;
 
       char c = cmd.charAt(0);
+      write.println(cmd);
+
       if (c == 'q') break;
 
-      write.println(cmd);
+
     }
   }
 
   public void closeAll()
   {
-    System.out.println("Client.closeAll()");
-
-    if (write != null) write.close();
-    if (reader != null)
+    synchronized (listener)
     {
-      try
+      System.out.println("Client.closeAll()");
+
+      if (write != null) write.close();
+      if (reader != null)
       {
-        reader.close();
-        clientSocket.close();
-      }
-      catch (IOException e)
-      {
-        System.err.println("Client Error: Could not close");
-        e.printStackTrace();
+        try
+        {
+          reader.close();
+          clientSocket.close();
+        } catch (IOException e)
+        {
+          System.err.println("Client Error: Could not close");
+          e.printStackTrace();
+        }
       }
     }
 
@@ -155,12 +159,13 @@ public class Client
 
 
 
-  class ClientListener extends Thread
+  class ClientSocketListener extends Thread
   {
+
     public void run()
     {
-      System.out.println("ClientListener.run()");
-      while (true)
+      System.out.println("ClientSocketListener.run()");
+      while (!clientSocket.isClosed())
       {
         read();
       }
@@ -169,39 +174,41 @@ public class Client
 
     private void read()
     {
-      try
+      synchronized (this)
       {
-        System.out.println("Client: listening to socket");
-        String msg = reader.readLine();
-        if (msg.startsWith("Sneeds:"))
+        try
         {
-          int idxOfNum = msg.indexOf(':') + 1;
-          int n = Integer.parseInt(msg.substring(idxOfNum));
-          sneedsInStore = n;
-          System.out.println("Current Invintory of Sneeds (" + timeDiff()
-                  + ") = " + sneedsInStore);
-        }
-        else if (msg.startsWith("You just bought "))
-        {
-          System.out.println("Success: " + msg);
-        }
-        else if (msg.startsWith("Error"))
-        {
-          System.out.println("Failed: " + msg);
-        }
-        else
-        {
-          System.out.println("Unrecognized message from Server(" + timeDiff()
-                  + ") = " + msg);
-        }
+          System.out.println("Client: listening to socket");
+          String msg = reader.readLine();
 
-      }
-      catch (IOException e)
-      {
-        e.printStackTrace();
+          if (msg.startsWith("inventory:"))
+          {
+            int idxOfNum = msg.indexOf(':') + 1;
+            int n = Integer.parseInt(msg.substring(idxOfNum));
+            sneedsInStore = n;
+            System.out.println("Current Inventory of Thneeds (" + timeDiff()
+                                       + ") = " + sneedsInStore);
+          }
+          else if (msg.startsWith("You just bought "))
+          {
+            System.out.println("Success: " + msg);
+          }
+          else if (msg.startsWith("Error"))
+          {
+            System.out.println("Failed: " + msg);
+          }
+          else
+          {
+            System.out.println("Unrecognized message from Server(" + timeDiff()
+                                       + ") = " + msg);
+          }
+
+        } catch (IOException e)
+        {
+          e.printStackTrace();
+        }
       }
     }
-
   }
 
 }

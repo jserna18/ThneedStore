@@ -6,13 +6,17 @@ import java.net.Socket;
 
 public class ServerWorker extends Thread
 {
+  public int workerId = 1;
+
   private Socket client;
   private PrintWriter clientWriter;
   private BufferedReader clientReader;
+  private ServerMaster master;
 
-  public ServerWorker(Socket client)
+  public ServerWorker(Socket client, ServerMaster master)
   {
     this.client = client;
+    this.master = master;
 
     try
     {
@@ -45,7 +49,33 @@ public class ServerWorker extends Thread
 
   public void run()
   {
+    try
+    {
+      System.out.println("Listening to Client");
+      String msg = clientReader.readLine();
+      if (msg.startsWith("quit:"))
+      {
+        master.cleanConnectionList(this);
+      }
+      else if (msg.startsWith("You just bought "))
+      {
+        System.out.println("Success: " + msg);
+      }
+      else if (msg.startsWith("Error"))
+      {
+        System.out.println("Failed: " + msg);
+      }
+      else
+      {
 
+      }
+
+    }
+    catch (IOException e)
+    {
+      e.printStackTrace();
+    }
   }
+
 
 }
