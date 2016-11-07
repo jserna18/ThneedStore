@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
@@ -14,8 +11,9 @@ public class Client
   private long startNanoSec;
   private Scanner keyboard;
   private ClientSocketListener listener;
+  private Scanner inputStream;
 
-  private volatile int sneedsInStore;
+  private volatile int ThneedsInStore;
 
   public Client(String host, int portNumber)
   {
@@ -87,18 +85,33 @@ public class Client
 
   private void listenToUserRequests()
   {
-    while (true)
+
+    try
     {
-      System.out.println("Sneeds in Inventory = " + sneedsInStore);
-      System.out.println("Enter Command (Buy: # | Sell: #):");
-      String cmd = keyboard.nextLine();
+      inputStream = new Scanner(new File("resources/input.txt"));
+    } catch (FileNotFoundException e)
+    {
+      e.printStackTrace();
+    }
+
+    while (inputStream.hasNext())
+    {
+      System.out.println("Thneeds in Inventory = " + ThneedsInStore);
+      System.out.println("Enter Command (buy: # | sell: #):");
+      String cmd = inputStream.nextLine();
       if (cmd == null) continue;
       if (cmd.length() < 1) continue;
-
-      char c = cmd.charAt(0);
       write.println(cmd);
 
+      char c = cmd.charAt(0);
       if (c == 'q') break;
+
+
+
+      if(c == 'b')
+      {
+
+      }
 
 
     }
@@ -106,22 +119,20 @@ public class Client
 
   public void closeAll()
   {
-    synchronized (listener)
-    {
-      System.out.println("Client.closeAll()");
+    System.out.println("Client.closeAll()");
 
-      if (write != null) write.close();
-      if (reader != null)
+    if (write != null) write.close();
+    if (reader != null)
+    {
+      try
       {
-        try
-        {
-          reader.close();
-          clientSocket.close();
-        } catch (IOException e)
-        {
-          System.err.println("Client Error: Could not close");
-          e.printStackTrace();
-        }
+        reader.close();
+        clientSocket.close();
+      }
+      catch (IOException e)
+      {
+        System.err.println("Client Error: Could not close");
+        e.printStackTrace();
       }
     }
 
@@ -167,48 +178,56 @@ public class Client
       System.out.println("ClientSocketListener.run()");
       while (!clientSocket.isClosed())
       {
-        read();
-      }
-
-    }
-
-    private void read()
-    {
-      synchronized (this)
-      {
         try
         {
-          System.out.println("Client: listening to socket");
-          String msg = reader.readLine();
-
-          if (msg.startsWith("inventory:"))
+          if(reader.ready())
           {
-            int idxOfNum = msg.indexOf(':') + 1;
-            int n = Integer.parseInt(msg.substring(idxOfNum));
-            sneedsInStore = n;
-            System.out.println("Current Inventory of Thneeds (" + timeDiff()
-                                       + ") = " + sneedsInStore);
+            read();
           }
-          else if (msg.startsWith("You just bought "))
-          {
-            System.out.println("Success: " + msg);
-          }
-          else if (msg.startsWith("Error"))
-          {
-            System.out.println("Failed: " + msg);
-          }
-          else
-          {
-            System.out.println("Unrecognized message from Server(" + timeDiff()
-                                       + ") = " + msg);
-          }
-
         } catch (IOException e)
         {
           e.printStackTrace();
         }
       }
+
+      System.out.println("Client Closing");
     }
+
+    private void read()
+    {
+      try
+      {
+        System.out.println("Client: listening to socket");
+        String msg = reader.readLine();
+
+        if (msg.startsWith("Thneeds:"))
+        {
+          int idxOfNum = msg.indexOf(':') + 1;
+          ThneedsInStore = Integer.parseInt(msg.substring(idxOfNum));
+          System.out.println("Current Inventory of Thneeds (" + timeDiff()
+                  + ") = " + ThneedsInStore);
+        }
+        else if (msg.startsWith("You just bought "))
+        {
+          System.out.println("Success: " + msg);
+        }
+        else if (msg.startsWith("Error"))
+        {
+          System.out.println("Failed: " + msg);
+        }
+        else
+        {
+          System.out.println("Unrecognized message from Server(" + timeDiff()
+                  + ") = " + msg);
+        }
+
+      }
+      catch (IOException e)
+      {
+        e.printStackTrace();
+      }
+    }
+
   }
 
 }

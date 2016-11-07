@@ -6,17 +6,19 @@ import java.net.Socket;
 
 public class ServerWorker extends Thread
 {
-  public int workerId = 1;
+  public int workerId;
 
   private Socket client;
   private PrintWriter clientWriter;
   private BufferedReader clientReader;
   private ServerMaster master;
+  private ThneedStore store;
 
-  public ServerWorker(Socket client, ServerMaster master)
+  public ServerWorker(Socket client, ServerMaster master, ThneedStore store)
   {
     this.client = client;
     this.master = master;
+    this.store = store;
 
     try
     {
@@ -47,33 +49,52 @@ public class ServerWorker extends Thread
     clientWriter.println(msg);
   }
 
+  //Called by ThneedStore
+  public void requestFailed()
+  {
+
+  }
+
   public void run()
   {
-    try
+    synchronized (this)
     {
-      System.out.println("Listening to Client");
-      String msg = clientReader.readLine();
-      if (msg.startsWith("quit:"))
+      try
       {
-        master.cleanConnectionList(this);
-      }
-      else if (msg.startsWith("You just bought "))
-      {
-        System.out.println("Success: " + msg);
-      }
-      else if (msg.startsWith("Error"))
-      {
-        System.out.println("Failed: " + msg);
-      }
-      else
-      {
+        while (!client.isClosed() && clientReader.ready())
+        {
+          System.out.println("Listening to Client");
+          String msg = clientReader.readLine();
 
-      }
+          if (msg.startsWith("quit:"))
+          {
+            master.cleanConnectionList(this);
+          }
+          else if (msg.startsWith("buy:") || msg.startsWith("sell:"))
+          {
+            int idxNumber = msg.indexOf(':');
+            String sub = msg.substring(idxNumber + 2);
+            int numberEnds = sub.indexOf(' ');
+            int number = Integer.parseInt(sub.substring(0, numberEnds));
+            double price = Double.parseDouble(sub.substring(numberEnds + 1));
 
-    }
-    catch (IOException e)
-    {
-      e.printStackTrace();
+            System.out.println(number + " " + price);
+
+            if (msg.charAt(0) == 'b')
+            {
+              store.buyThneeds(this, number, price);
+            }
+            else
+            {
+              store.sellThneeds(this, number, price);
+            }
+          }
+        }
+      }
+      catch (IOException e)
+      {
+        e.printStackTrace();
+      }
     }
   }
 

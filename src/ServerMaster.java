@@ -9,10 +9,11 @@ public class ServerMaster
 {
   private ServerSocket serverSocket;
   private LinkedList<ServerWorker> allConnections = new LinkedList<ServerWorker>();
+  private ThneedStore store;
 
   public ServerMaster(int portNumber)
   {
-    ThneedStore store = new ThneedStore();
+    store = new ThneedStore(1000.00, this);
 
     try
     {
@@ -45,7 +46,7 @@ public class ServerMaster
       try
       {
         Socket client = serverSocket.accept();
-        ServerWorker worker = new ServerWorker(client, this);
+        ServerWorker worker = new ServerWorker(client, this, store);
         worker.start();
         System.out.println("ServerMaster: *********** new Connection");
         allConnections.add(worker);
@@ -64,14 +65,15 @@ public class ServerMaster
   {
     allConnections.remove(worker);
     System.out.println("cleared worker: " + worker.workerId);
+    System.out.println("Number of worker's connected = " + allConnections.size());
 
   }
 
-  public void broadcast(String s)
+  public void broadcast(int thneeds)
   {
     for (ServerWorker workers : allConnections)
     {
-
+      workers.send("Thneeds:" + thneeds);
     }
   }
 
