@@ -55,48 +55,65 @@ public class ServerWorker extends Thread
 
   }
 
-  public void run()
+  private void buyAndSell(String msg)
   {
     synchronized (this)
     {
-      try
+      int idxNumber = msg.indexOf(':');
+      String sub = msg.substring(idxNumber + 2);
+      int numberEnds = sub.indexOf(' ');
+      int number = Integer.parseInt(sub.substring(0, numberEnds));
+      double price = Double.parseDouble(sub.substring(numberEnds + 1));
+
+      System.out.println(number + " " + price);
+
+      if (msg.charAt(0) == 'b')
       {
-        while (!client.isClosed() && clientReader.ready())
-        {
-          System.out.println("Listening to Client");
-          String msg = clientReader.readLine();
-
-          if (msg.startsWith("quit:"))
-          {
-            master.cleanConnectionList(this);
-          }
-          else if (msg.startsWith("buy:") || msg.startsWith("sell:"))
-          {
-            int idxNumber = msg.indexOf(':');
-            String sub = msg.substring(idxNumber + 2);
-            int numberEnds = sub.indexOf(' ');
-            int number = Integer.parseInt(sub.substring(0, numberEnds));
-            double price = Double.parseDouble(sub.substring(numberEnds + 1));
-
-            System.out.println(number + " " + price);
-
-            if (msg.charAt(0) == 'b')
-            {
-              store.buyThneeds(this, number, price);
-            }
-            else
-            {
-              store.sellThneeds(this, number, price);
-            }
-          }
-        }
+        store.buyThneeds(this, number, price);
       }
-      catch (IOException e)
+      else
       {
-        e.printStackTrace();
+        store.sellThneeds(this, number, price);
       }
     }
   }
 
+  public void run()
+  {
+//    try
+//    {
+//      String ms = clientReader.readLine();
+//      System.out.println(ms);
+//    } catch (IOException e)
+//    {
+//      e.printStackTrace();
+//    }
+//    String msg = "";
+    try
+    {
+      while (true)
+      {
+        String msg = clientReader.readLine();
+        System.out.println("Listening to Client");
+        System.out.println("ServerWorker got: " + msg);
 
+        if(msg == null)
+        {
+          break;
+        }
+
+        else if (msg.startsWith("quit:"))
+        {
+          master.cleanConnectionList(this);
+        }
+        else if (msg.startsWith("buy:") || msg.startsWith("sell:"))
+        {
+          buyAndSell(msg);
+        }
+      }
+    } catch (IOException e)
+    {
+      e.printStackTrace();
+    }
+  }
 }

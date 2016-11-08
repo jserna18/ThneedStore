@@ -61,6 +61,11 @@ public class ThneedStore
     }
   }
 
+  public int getInventory()
+  {
+    return thneeds;
+  }
+
 }
 
 

@@ -15,15 +15,40 @@ public class Client
 
   private volatile int ThneedsInStore;
 
+  public Client(String host, int portNumber, String file)
+  {
+    try
+    {
+      inputStream = new Scanner(new File(file));
+    } catch (FileNotFoundException e)
+    {
+      e.printStackTrace();
+    }
+
+    start(host, portNumber);
+  }
+
   public Client(String host, int portNumber)
   {
     startNanoSec = System.nanoTime();
     System.out.println("Starting Client: " + timeDiff());
 
-    keyboard = new Scanner(System.in);
+    inputStream = new Scanner(System.in);
 
+    start(host, portNumber);
+  }
+
+  private void start(String host, int portNumber)
+  {
     while (!openConnection(host, portNumber))
     {
+      try
+      {
+        Thread.sleep(1000);
+      } catch (InterruptedException e)
+      {
+        e.printStackTrace();
+      }
     }
 
     listener = new ClientSocketListener();
@@ -33,7 +58,6 @@ public class Client
     listenToUserRequests();
 
     closeAll();
-
   }
 
 
@@ -85,34 +109,36 @@ public class Client
 
   private void listenToUserRequests()
   {
-
-    try
-    {
-      inputStream = new Scanner(new File("resources/input.txt"));
-    } catch (FileNotFoundException e)
-    {
-      e.printStackTrace();
-    }
-
     while (inputStream.hasNext())
     {
-      System.out.println("Thneeds in Inventory = " + ThneedsInStore);
-      System.out.println("Enter Command (buy: # | sell: #):");
+//      System.out.println("Thneeds in Inventory = " + ThneedsInStore);
+//      System.out.println("Enter Command (buy: # | sell: #):");
       String cmd = inputStream.nextLine();
       if (cmd == null) continue;
       if (cmd.length() < 1) continue;
-      write.println(cmd);
-
       char c = cmd.charAt(0);
-      if (c == 'q') break;
-
-
 
       if(c == 'b')
       {
-
+        String sub = cmd.substring(5);
+        int number = Integer.parseInt(sub.substring(0, sub.indexOf(' ')));
+        ThneedsInStore += number;
       }
 
+      else if(c == 's')
+      {
+        String sub = cmd.substring(6);
+        int number = Integer.parseInt(sub.substring(0, sub.indexOf(' ')));
+        if((ThneedsInStore - number) < 0)
+        {
+          continue;
+        }
+        ThneedsInStore -= number;
+      }
+
+      else if (c == 'q') break;
+
+      write.println(cmd);
 
     }
   }
@@ -163,8 +189,14 @@ public class Client
       System.out.println("Usage: Client hostname portNumber");
       System.exit(0);
     }
-    new Client(host, port);
-
+    if(args[2] != null)
+    {
+      new Client(host, port, args[2]);
+    }
+    else
+    {
+      new Client(host, port);
+    }
   }
 
 
