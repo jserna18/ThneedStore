@@ -57,7 +57,7 @@ public class Client
 
     listenToUserRequests();
 
-    closeAll();
+    //closeAll();
   }
 
 
@@ -139,7 +139,6 @@ public class Client
       else if (c == 'q') break;
 
       write.println(cmd);
-
     }
   }
 
@@ -153,7 +152,7 @@ public class Client
       try
       {
         reader.close();
-        clientSocket.close();
+//        clientSocket.close();
       }
       catch (IOException e)
       {
@@ -198,9 +197,6 @@ public class Client
       new Client(host, port);
     }
   }
-
-
-
 
   class ClientSocketListener extends Thread
   {

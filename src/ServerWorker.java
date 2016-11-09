@@ -13,6 +13,7 @@ public class ServerWorker extends Thread
   private BufferedReader clientReader;
   private ServerMaster master;
   private ThneedStore store;
+  public boolean reading = true;
 
   public ServerWorker(Socket client, ServerMaster master, ThneedStore store)
   {
@@ -65,8 +66,6 @@ public class ServerWorker extends Thread
       int number = Integer.parseInt(sub.substring(0, numberEnds));
       double price = Double.parseDouble(sub.substring(numberEnds + 1));
 
-      System.out.println(number + " " + price);
-
       if (msg.charAt(0) == 'b')
       {
         store.buyThneeds(this, number, price);
@@ -91,11 +90,13 @@ public class ServerWorker extends Thread
 //    String msg = "";
     try
     {
+      int count = 0;
       while (true)
       {
+
         String msg = clientReader.readLine();
-        System.out.println("Listening to Client");
-        System.out.println("ServerWorker got: " + msg);
+        count++;
+        System.out.println("ServerWorker got: " + msg + " " + count);
 
         if(msg == null)
         {
@@ -111,6 +112,7 @@ public class ServerWorker extends Thread
           buyAndSell(msg);
         }
       }
+      reading = false;
     } catch (IOException e)
     {
       e.printStackTrace();

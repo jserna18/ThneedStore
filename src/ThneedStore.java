@@ -31,7 +31,6 @@ public class ThneedStore
         totalCost = (amount * cents);
         thneeds += amount;
         treasuryBalance -= (totalCost/100.00);
-        System.out.println(thneeds + " $" + treasuryBalance);
         master.broadcast(thneeds);
       }
 
