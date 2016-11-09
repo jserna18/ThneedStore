@@ -50,6 +50,7 @@ public class ServerMaster
         worker.start();
         System.out.println("ServerMaster: *********** new Connection");
         allConnections.add(worker);
+        worker.workerId = allConnections.size();
         worker.send("ServerMaster in waitForConnection says hello!");
       }
       catch (IOException e)
@@ -73,7 +74,7 @@ public class ServerMaster
   {
     for (ServerWorker workers : allConnections)
     {
-      workers.send("Thneeds:" + thneeds);
+      workers.send("Thneeds:" + thneeds+ " Id:" + workers.workerId);
     }
   }
 
