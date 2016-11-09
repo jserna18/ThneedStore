@@ -95,8 +95,6 @@ public class ServerWorker extends Thread
       {
 
         String msg = clientReader.readLine();
-        count++;
-        System.out.println("ServerWorker got: " + msg + " " + count);
 
         if(msg == null)
         {

@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
+import java.util.concurrent.atomic.DoubleAccumulator;
 
 public class Client
 {
@@ -14,6 +15,7 @@ public class Client
   private Scanner inputStream;
 
   private volatile int ThneedsInStore;
+  private volatile double treasury = 1000.00;
 
   public Client(String host, int portNumber, String file)
   {
@@ -57,7 +59,15 @@ public class Client
 
     listenToUserRequests();
 
-    //closeAll();
+    try
+    {
+      System.out.println("Client closing");
+      Thread.sleep(10000);
+    } catch (InterruptedException e)
+    {
+      e.printStackTrace();
+    }
+    closeAll();
   }
 
 
@@ -111,8 +121,6 @@ public class Client
   {
     while (inputStream.hasNext())
     {
-//      System.out.println("Thneeds in Inventory = " + ThneedsInStore);
-//      System.out.println("Enter Command (buy: # | sell: #):");
       String cmd = inputStream.nextLine();
       if (cmd == null) continue;
       if (cmd.length() < 1) continue;
@@ -122,6 +130,12 @@ public class Client
       {
         String sub = cmd.substring(5);
         int number = Integer.parseInt(sub.substring(0, sub.indexOf(' ')));
+        double price = Double.parseDouble(sub.substring(sub.indexOf(' ')+1, sub.length()-1));
+        double finalPrice = number*price;
+        if(finalPrice > treasury)
+        {
+          continue;
+        }
         ThneedsInStore += number;
       }
 
@@ -135,8 +149,12 @@ public class Client
         }
         ThneedsInStore -= number;
       }
+      else if(c == 'i')
+      {
+        System.out.println("Current local Inventory: " + ThneedsInStore);
+      }
 
-      else if (c == 'q') break;
+//      else if (c == 'q') break;
 
       write.println(cmd);
     }
@@ -152,7 +170,7 @@ public class Client
       try
       {
         reader.close();
-//        clientSocket.close();
+        clientSocket.close();
       }
       catch (IOException e)
       {
@@ -218,7 +236,7 @@ public class Client
         }
       }
 
-      System.out.println("Client Closing");
+      System.out.println("Client Master Socket Listener Closing");
     }
 
     private void read()
@@ -232,8 +250,8 @@ public class Client
         {
           int idxOfNum = msg.indexOf(':') + 1;
           ThneedsInStore = Integer.parseInt(msg.substring(idxOfNum));
-          System.out.println("Current Inventory of Thneeds (" + timeDiff()
-                  + ") = " + ThneedsInStore);
+//          System.out.println("Current Inventory of Thneeds (" + timeDiff()
+//                  + ") = " + ThneedsInStore);
         }
         else if (msg.startsWith("You just bought "))
         {
