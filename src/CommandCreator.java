@@ -23,14 +23,14 @@ public class CommandCreator
 
     try {
       //create a temporary file
-      File logFile = new File("InputCommands1");
+      File logFile = new File("SmallInput");
 
       // This will output the full path where the file will be written to...
       System.out.println(logFile.getCanonicalPath());
 
       writer = new BufferedWriter(new FileWriter(logFile));
 
-      for (int i = 0; i < 500_000; i++) {
+      for (int i = 0; i < 100_000; i++) {
         amt = rand.nextInt(50);
         dollars = rand.nextInt(11);
         cents = rand.nextInt(100);

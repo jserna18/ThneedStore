@@ -17,6 +17,13 @@ public class Client
   private volatile int ThneedsInStore;
   private volatile double treasury = 1000.00;
 
+  /**
+   * Constructor which allows for an input file to be read as commands from the
+   * user.
+   * @param host
+   * @param portNumber
+   * @param file
+   */
   public Client(String host, int portNumber, String file)
   {
     try
@@ -30,6 +37,11 @@ public class Client
     start(host, portNumber);
   }
 
+  /**
+   * Constructor which sets the inputStream to accept from keyboard input
+   * @param host
+   * @param portNumber
+   */
   public Client(String host, int portNumber)
   {
     startNanoSec = System.nanoTime();
@@ -40,6 +52,11 @@ public class Client
     start(host, portNumber);
   }
 
+  /**
+   *
+   * @param host
+   * @param portNumber
+   */
   private void start(String host, int portNumber)
   {
     while (!openConnection(host, portNumber))
@@ -70,7 +87,12 @@ public class Client
     closeAll();
   }
 
-
+  /**
+   *
+   * @param host
+   * @param portNumber
+   * @return
+   */
   private boolean openConnection(String host, int portNumber)
   {
 
@@ -117,6 +139,9 @@ public class Client
 
   }
 
+  /**
+   *
+   */
   private void listenToUserRequests()
   {
     while (inputStream.hasNext())
@@ -160,6 +185,9 @@ public class Client
     }
   }
 
+  /**
+   *
+   */
   public void closeAll()
   {
     System.out.println("Client.closeAll()");
@@ -181,6 +209,10 @@ public class Client
 
   }
 
+  /**
+   *
+   * @return
+   */
   private String timeDiff()
   {
     long namoSecDiff = System.nanoTime() - startNanoSec;
@@ -189,6 +221,10 @@ public class Client
 
   }
 
+  /**
+   *
+   * @param args
+   */
   public static void main(String[] args)
   {
 
@@ -216,6 +252,9 @@ public class Client
     }
   }
 
+  /**
+   *
+   */
   class ClientSocketListener extends Thread
   {
 
@@ -239,19 +278,19 @@ public class Client
       System.out.println("Client Master Socket Listener Closing");
     }
 
+    /**
+     *
+     */
     private void read()
     {
       try
       {
-        System.out.println("Client: listening to socket");
         String msg = reader.readLine();
 
         if (msg.startsWith("Thneeds:"))
         {
           int idxOfNum = msg.indexOf(':') + 1;
           ThneedsInStore = Integer.parseInt(msg.substring(idxOfNum));
-//          System.out.println("Current Inventory of Thneeds (" + timeDiff()
-//                  + ") = " + ThneedsInStore);
         }
         else if (msg.startsWith("You just bought "))
         {

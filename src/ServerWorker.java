@@ -15,6 +15,12 @@ public class ServerWorker extends Thread
   private ThneedStore store;
   public boolean reading = true;
 
+  /**
+   *
+   * @param client
+   * @param master
+   * @param store
+   */
   public ServerWorker(Socket client, ServerMaster master, ThneedStore store)
   {
     this.client = client;
@@ -43,19 +49,20 @@ public class ServerWorker extends Thread
     }
   }
 
-  //Called by ServerMaster
+  /**
+   * Called by ServerMaster
+   * @param msg
+   */
   public void send(String msg)
   {
     System.out.println("ServerWorker.send(" + msg + ")");
     clientWriter.println(msg);
   }
 
-  //Called by ThneedStore
-  public void requestFailed()
-  {
-
-  }
-
+  /**
+   *
+   * @param msg
+   */
   private void buyAndSell(String msg)
   {
     synchronized (this)
@@ -77,17 +84,11 @@ public class ServerWorker extends Thread
     }
   }
 
+  /**
+   *
+   */
   public void run()
   {
-//    try
-//    {
-//      String ms = clientReader.readLine();
-//      System.out.println(ms);
-//    } catch (IOException e)
-//    {
-//      e.printStackTrace();
-//    }
-//    String msg = "";
     try
     {
       int count = 0;

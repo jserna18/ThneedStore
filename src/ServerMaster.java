@@ -29,6 +29,11 @@ public class ServerMaster
     waitForConnection(portNumber);
   }
 
+  /**
+   * Accepts new clients on the current open port. Creates a ServerWorker for communication
+   * from Client to ServerMaster.
+   * @param port
+   */
   public void waitForConnection(int port)
   {
     String host = "";
@@ -51,7 +56,6 @@ public class ServerMaster
         System.out.println("ServerMaster: *********** new Connection");
         allConnections.add(worker);
         worker.workerId = allConnections.size();
-        worker.send("ServerMaster in waitForConnection says hello!");
       }
       catch (IOException e)
       {
@@ -62,6 +66,10 @@ public class ServerMaster
     }
   }
 
+  /**
+   * removes the worker from the ServerWorker ArrayList
+   * @param worker
+   */
   public void cleanConnectionList(ServerWorker worker)
   {
     allConnections.remove(worker);
@@ -70,11 +78,15 @@ public class ServerMaster
 
   }
 
+  /**
+   * sends the current Thneeds inventory to all clients
+   * @param thneeds
+   */
   public void broadcast(int thneeds)
   {
     for (ServerWorker workers : allConnections)
     {
-      workers.send("Thneeds:" + thneeds+ " Id:" + workers.workerId);
+      workers.send("Thneeds:" + thneeds);
     }
   }
 

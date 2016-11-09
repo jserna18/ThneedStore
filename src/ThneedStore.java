@@ -3,26 +3,35 @@
  */
 public class ThneedStore
 {
-  ServerMaster master;
+  private ServerMaster master;
   private int thneeds;
   private double treasuryBalance;
   private int cents;
   private int totalCost;
 
-
+  /**
+   * Constructor with an intital balance and ServerMaster
+   * @param startingBalance
+   * @param master
+   */
   public ThneedStore(double startingBalance, ServerMaster master)
   {
     treasuryBalance = startingBalance;
     this.master = master;
   }
 
+  /**
+   * Adds to the current Thneeds in the store and reduces the treasury's value.
+   * @param wrkr
+   * @param amount
+   * @param price
+   */
   public void buyThneeds(ServerWorker wrkr, int amount, double price)
   {
     synchronized (wrkr)
     {
       if (price > treasuryBalance)
       {
-        //do something
         return;
       }
       else
@@ -33,10 +42,15 @@ public class ThneedStore
         treasuryBalance -= (totalCost/100.00);
         master.broadcast(thneeds);
       }
-
     }
   }
 
+  /**
+   * Reduces the number of Thneeds in the store and adds to the Treasury's value
+   * @param wrkr
+   * @param amount
+   * @param price
+   */
   public void sellThneeds(ServerWorker wrkr, int amount, double price)
   {
     synchronized (wrkr)
@@ -44,7 +58,6 @@ public class ThneedStore
 
       if (amount > thneeds)
       {
-        //do something
         return;
       }
       else
@@ -59,12 +72,6 @@ public class ThneedStore
 
     }
   }
-
-  public int getInventory()
-  {
-    return thneeds;
-  }
-
 }
 
 
