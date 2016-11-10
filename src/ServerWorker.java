@@ -4,6 +4,10 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+/**
+ * ServerWorker communicates information from the ServerMaster to the Client
+ * and vice versa.
+ */
 public class ServerWorker extends Thread
 {
   public int workerId;
@@ -13,10 +17,10 @@ public class ServerWorker extends Thread
   private BufferedReader clientReader;
   private ServerMaster master;
   private ThneedStore store;
-  public boolean reading = true;
 
   /**
-   *
+   * Constructor which creates a new ServerWorker and sets the PrintWriter
+   * to the sockets output stream and a BufferedReader to the input stream
    * @param client
    * @param master
    * @param store
@@ -29,7 +33,6 @@ public class ServerWorker extends Thread
 
     try
     {
-      //          PrintWriter(OutputStream out, boolean autoFlushOutputBuffer)
       clientWriter = new PrintWriter(client.getOutputStream(), true);
     }
     catch (IOException e)
@@ -59,7 +62,8 @@ public class ServerWorker extends Thread
   }
 
   /**
-   *
+   * Converts the given string into an amount and value which will be
+   * either bought or sold from the ThneedStore
    * @param msg
    */
   private void buyAndSell(String msg)
@@ -84,7 +88,8 @@ public class ServerWorker extends Thread
   }
 
   /**
-   *
+   * Reads input from the Sockets InputStream. Will either
+   * buy or sell Thneeds from ThneedStore until told to "quit"
    */
   public void run()
   {
@@ -110,7 +115,6 @@ public class ServerWorker extends Thread
           buyAndSell(msg);
         }
       }
-      reading = false;
     } catch (IOException e)
     {
       e.printStackTrace();

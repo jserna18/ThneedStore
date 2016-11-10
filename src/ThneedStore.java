@@ -1,5 +1,6 @@
 /**
- * Created by juaker505 on 11/5/2016.
+ * ThneedStore keeps the global copy of Thneeds and the treasury balance. Accessor
+ * methods are synchronously used to both buy and sell Thneeds
  */
 public class ThneedStore
 {

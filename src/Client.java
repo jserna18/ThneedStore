@@ -4,13 +4,16 @@ import java.net.UnknownHostException;
 import java.util.Scanner;
 import java.util.concurrent.atomic.DoubleAccumulator;
 
+/**
+ * Client creates 2 seperate threads. One will listen for input from System.in
+ * and the other will listen to the ServerMaster
+ */
 public class Client
 {
   private Socket clientSocket;
   private PrintWriter write;
   private BufferedReader reader;
   private long startNanoSec;
-  private Scanner keyboard;
   private ClientSocketListener listener;
   private Scanner inputStream;
 
@@ -88,7 +91,7 @@ public class Client
   }
 
   /**
-   *
+   * Opens a new socket connection on the given port number
    * @param host
    * @param portNumber
    * @return
@@ -139,6 +142,13 @@ public class Client
 
   }
 
+  /**
+   * Confirms that the local copy of Thneeds and Treasury amount is valid to process
+   * a buy or sell request. Also check that the amount requested is positive.
+   * @param cmd
+   * @param c
+   * @return
+   */
   private boolean enoughThneedsAndMoney(String cmd, char c)
   {
     synchronized (this)
@@ -166,13 +176,13 @@ public class Client
         }
         else ThneedsInStore -= number;
       }
-      System.out.println("Local inventory: " + ThneedsInStore + " treasury: " + Treasury);
       return true;
     }
   }
 
   /**
-   *
+   * linstens to the inputStream for a user request and prcesses the request
+   * based on its first char
    */
   private void listenToUserRequests()
   {
@@ -194,7 +204,7 @@ public class Client
 
       else if(c == 'i')
       {
-        System.out.println("Current local Inventory: " + ThneedsInStore);
+        System.out.println("Current local: Inventory: " + ThneedsInStore);
       }
 
       write.println(cmd);
@@ -228,7 +238,8 @@ public class Client
   }
 
   /**
-   *
+   * Returns the time difference from when the Client was created until the
+   * current time
    * @return
    */
   private String timeDiff()
@@ -271,7 +282,8 @@ public class Client
   }
 
   /**
-   *
+   * Starts a new thread which only listens for information being sent from
+   * the ServerWorker via a ServerMaster
    */
   class ClientSocketListener extends Thread
   {

@@ -23,18 +23,18 @@ public class CommandCreator
 
     try {
       //create a temporary file
-      File logFile = new File("SmallInput");
+      File logFile = new File("Input3");
 
       // This will output the full path where the file will be written to...
       System.out.println(logFile.getCanonicalPath());
 
       writer = new BufferedWriter(new FileWriter(logFile));
 
-      for (int i = 0; i < 20; i++) {
+      for (int i = 0; i < 500_000; i++) {
         amt = rand.nextInt(50);
         dollars = rand.nextInt(11);
         cents = rand.nextInt(100);
-        command = rand.nextInt(3);
+        command = rand.nextInt(2);
 
         if (command == 0) {
           try {
@@ -48,7 +48,8 @@ public class CommandCreator
           } catch (IOException e) {
             e.printStackTrace();
           }
-        } else {
+        }
+        if(i%25000 == 0){
           try {
             writer.write("inventory:\n");
           } catch (IOException e) {

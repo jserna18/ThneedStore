@@ -5,6 +5,10 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 
+/**
+ * ServerMaster dedicates a given port. A server socket is created when a new Client
+ * is received on the port.
+ */
 public class ServerMaster
 {
   private ServerSocket serverSocket;
