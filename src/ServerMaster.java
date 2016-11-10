@@ -10,10 +10,13 @@ public class ServerMaster
   private ServerSocket serverSocket;
   private LinkedList<ServerWorker> allConnections = new LinkedList<ServerWorker>();
   private ThneedStore store;
+  private long startNanoSec;
 
   public ServerMaster(int portNumber)
   {
     store = new ThneedStore(1000.00, this);
+    startNanoSec = System.nanoTime();
+
 
     try
     {
@@ -82,12 +85,21 @@ public class ServerMaster
    * sends the current Thneeds inventory to all clients
    * @param thneeds
    */
-  public void broadcast(int thneeds)
+  public void broadcast(int thneeds, double treasury, int id)
   {
     for (ServerWorker workers : allConnections)
     {
-      workers.send("Thneeds:" + thneeds);
+      workers.send("time(" +timeDiff() + "): inventory=" + thneeds +
+                   " : treasury=" + String.format("%.2f", treasury));
     }
+  }
+
+  private String timeDiff()
+  {
+    long namoSecDiff = System.nanoTime() - startNanoSec;
+    double secDiff = (double) namoSecDiff / 1000000000.0;
+    return String.format("%.3f", secDiff);
+
   }
 
   public static void main(String args[])

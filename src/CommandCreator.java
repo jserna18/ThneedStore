@@ -30,7 +30,7 @@ public class CommandCreator
 
       writer = new BufferedWriter(new FileWriter(logFile));
 
-      for (int i = 0; i < 100_000; i++) {
+      for (int i = 0; i < 20; i++) {
         amt = rand.nextInt(50);
         dollars = rand.nextInt(11);
         cents = rand.nextInt(100);

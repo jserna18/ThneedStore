@@ -15,7 +15,7 @@ public class Client
   private Scanner inputStream;
 
   private volatile int ThneedsInStore;
-  private volatile double treasury = 1000.00;
+  private volatile double Treasury = 1000.00;
 
   /**
    * Constructor which allows for an input file to be read as commands from the
@@ -139,6 +139,38 @@ public class Client
 
   }
 
+  private boolean enoughThneedsAndMoney(String cmd, char c)
+  {
+    synchronized (this)
+    {
+      if (c == 'b')
+      {
+        String sub = cmd.substring(5);
+        int number = Integer.parseInt(sub.substring(0, sub.indexOf(' ')));
+        double price = Double.parseDouble(sub.substring(sub.indexOf(' ') + 1, sub.length() - 1));
+        double finalPrice = number * price;
+
+        if ((finalPrice > Treasury) || (number < 1))
+        {
+          return false;
+        }
+        else ThneedsInStore += number;
+      }
+      else
+      {
+        String sub = cmd.substring(6);
+        int number = Integer.parseInt(sub.substring(0, sub.indexOf(' ')));
+        if (((ThneedsInStore - number) < 0) || (number < 1))
+        {
+          return false;
+        }
+        else ThneedsInStore -= number;
+      }
+      System.out.println("Local inventory: " + ThneedsInStore + " treasury: " + Treasury);
+      return true;
+    }
+  }
+
   /**
    *
    */
@@ -151,37 +183,23 @@ public class Client
       if (cmd.length() < 1) continue;
       char c = cmd.charAt(0);
 
-      if(c == 'b')
+
+      if(c == 'b' || c == 's')
       {
-        String sub = cmd.substring(5);
-        int number = Integer.parseInt(sub.substring(0, sub.indexOf(' ')));
-        double price = Double.parseDouble(sub.substring(sub.indexOf(' ')+1, sub.length()-1));
-        double finalPrice = number*price;
-        if(finalPrice > treasury)
+        if(!enoughThneedsAndMoney(cmd, c))
         {
           continue;
         }
-        ThneedsInStore += number;
       }
 
-      else if(c == 's')
-      {
-        String sub = cmd.substring(6);
-        int number = Integer.parseInt(sub.substring(0, sub.indexOf(' ')));
-        if((ThneedsInStore - number) < 0)
-        {
-          continue;
-        }
-        ThneedsInStore -= number;
-      }
       else if(c == 'i')
       {
         System.out.println("Current local Inventory: " + ThneedsInStore);
       }
 
-//      else if (c == 'q') break;
-
       write.println(cmd);
+
+      if(c == 'q') break;
     }
   }
 
@@ -242,7 +260,7 @@ public class Client
       System.out.println("Usage: Client hostname portNumber");
       System.exit(0);
     }
-    if(args[2] != null)
+    if(args.length == 3)
     {
       new Client(host, port, args[2]);
     }
@@ -279,7 +297,25 @@ public class Client
     }
 
     /**
-     *
+     * updates the clients copy of Thnneds and Treasury
+     * @param msg
+     */
+    private  void updateThneeds(String msg)
+    {
+      synchronized (this)
+      {
+        String sub = msg.substring(msg.indexOf('=')+1);
+        String amount = sub.substring(0, sub.indexOf(' '));
+        String treasury = amount.substring(amount.indexOf('=')+1);
+
+        ThneedsInStore = Integer.parseInt(amount);
+        Treasury = Double.parseDouble(treasury);
+      }
+    }
+
+    /**
+     * reads from the sockets output stream and updates the Client's copy of inventory
+     * and treasury.
      */
     private void read()
     {
@@ -287,18 +323,12 @@ public class Client
       {
         String msg = reader.readLine();
 
-        if (msg.startsWith("Thneeds:"))
+        if (msg.startsWith("time("))
         {
-          int idxOfNum = msg.indexOf(':') + 1;
-          ThneedsInStore = Integer.parseInt(msg.substring(idxOfNum));
-        }
-        else if (msg.startsWith("You just bought "))
-        {
-          System.out.println("Success: " + msg);
-        }
-        else if (msg.startsWith("Error"))
-        {
-          System.out.println("Failed: " + msg);
+          updateThneeds(msg);
+
+          // Print message for Professor/T.A. code evaluation
+//          System.out.println(msg);
         }
         else
         {

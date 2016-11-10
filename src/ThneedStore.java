@@ -4,8 +4,8 @@
 public class ThneedStore
 {
   private ServerMaster master;
-  private int thneeds;
-  private double treasuryBalance;
+  private volatile int thneeds;
+  private volatile double treasuryBalance;
   private int cents;
   private int totalCost;
 
@@ -28,6 +28,7 @@ public class ThneedStore
    */
   public void buyThneeds(ServerWorker wrkr, int amount, double price)
   {
+
     synchronized (wrkr)
     {
       if (price > treasuryBalance)
@@ -40,7 +41,7 @@ public class ThneedStore
         totalCost = (amount * cents);
         thneeds += amount;
         treasuryBalance -= (totalCost/100.00);
-        master.broadcast(thneeds);
+        master.broadcast(thneeds, treasuryBalance, wrkr.workerId);
       }
     }
   }
@@ -64,10 +65,9 @@ public class ThneedStore
       {
         cents = (int)(price * 100.00);
         totalCost = (amount * cents);
-
         thneeds -= amount;
         treasuryBalance += (totalCost/100.00);
-        master.broadcast(thneeds);
+        master.broadcast(thneeds, treasuryBalance, wrkr.workerId);
       }
 
     }

@@ -55,7 +55,6 @@ public class ServerWorker extends Thread
    */
   public void send(String msg)
   {
-    System.out.println("ServerWorker.send(" + msg + ")");
     clientWriter.println(msg);
   }
 
